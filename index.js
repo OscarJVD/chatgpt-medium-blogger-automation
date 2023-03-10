@@ -5,7 +5,7 @@ import FormData from 'form-data';
 import fs from 'fs';
 import { google } from 'googleapis';
 import open from 'open';
-
+import cron from 'node-cron'
 const app = express();
 
 const fileName = 'tokens.txt';
@@ -132,11 +132,11 @@ const getChatGPTBlog = async () => {
   // Select a random language
   const randomLanguage = languages[Math.floor(Math.random() * languages.length)]
 
-  const postQuestion = `Give me an article for a blog that is only about one of these topics of your choice: ${randomTopicsStr}. It must be in ${randomLanguage}, be at least 2000 characters long, give me 5 keywords that describe the article and have the following format: 
+  const postQuestion = `Give me an article for a blog that is only about one of these topics of your choice: ${randomTopicsStr}. It must be in ${randomLanguage}, be at least 2000 characters long, give me 5 keywords that describe the article and have the following format:
   Title: [Title]
-  
+
   Story: [Story]
-  
+
   Keywords: [keywords]`;
 
   const api = new ChatGPTAPI({
@@ -360,5 +360,12 @@ app.get('/googleauthcallback', async (req, res) => {
 // Inicia el servidor
 app.listen(3124, () => {
   console.log('La aplicación está corriendo en http://localhost:3124');
+  console.log("CRON INICIALIZADO")
+  let counter = 1
+  cron.schedule("0 0 13 * * *", () => {
+    console.log("Ejecutando Cron de posts #" + counter)
+    init().then(() => console.log("Ejecusion cron Finalizada #" + counter)).catch(err => console.log("ERROR: #" + counter, err))
+    counter++;
+  })
   init();
 });
